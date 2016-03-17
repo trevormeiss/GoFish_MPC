@@ -32,7 +32,8 @@ A simple command line game of Go Fish using Secure MultiParty Computation
 			- X is the card rank S is looking for (1-13)
 			- i is the index of a card of rank X from S's hand
 				- In order for S to request cards of rank X, they must have at least one of these cards in their hand
-				- all players exchange shares of this deck index to verify that S actually has this card
+				- R sends validateRequest(R,X,i) to all players except S
+					-  each receiver obtains all shares of card at index i to validate it is of rank X
 
 		- If R has card(s) of rank X
 			- R sends indices of these cards to S
