@@ -11,7 +11,7 @@ A simple command line game of Go Fish using Secure MultiParty Computation
 ## Protocol Overview
 
 1. Create Deck
-	Trusted Initializer
+	- Trusted Initializer
 		- Shuffles Deck (array of integers 1-52)
 		- Generates n-out-of-n share of every card for all n players
 		- Each player receives array of their shares of the deck
