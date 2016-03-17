@@ -60,7 +60,7 @@ A simple command line game of Go Fish using Secure MultiParty Computation
   * `$ ./GoFish_Player PORT`
 2. Start an initializer on any machine to connect and initialize the players
   * `$ ./GoFish_Initializer`
-3. With the admin, connect to all the players
+3. With the initializer, connect to all the players
   * `c IP PORT`
 4. For sanity check, list all connected players
   * `ls`
