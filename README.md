@@ -67,7 +67,7 @@ A simple command line game of Go Fish using Secure MultiParty Computation
   * `c IP PORT`
 4. For sanity check, list all connected players
   * `ls`
-5. Optionally set the prime number to be used by all players
+5. Optionally set the prime number to be used by all players (should be higher than 52)
   * `p PRIME`
 6. Start Go Fish!
   * `s`
@@ -77,3 +77,15 @@ A simple command line game of Go Fish using Secure MultiParty Computation
 8. Select a card rank to request
   * i.e. `A`
 9. Continue playing until all the cards are used!
+
+## Issues
+If you make a request to the player that just went before you, the game will freeze
+Here is what happens:
+- Player 1 tells Player 2 it is their turn
+	- oneway void yourTurn()
+- Player 2 sends request to Player 1
+	- request(1,Rank,index)
+- Player 1 constructs card from index to see if it matches rank
+	-  requires that Player get share of this index from Player 2
+		- this is where it deadlocks
+		- yourTurn() hasn't finished, so when player 1 calls getDeckShare(index) on player 2 it freezes
