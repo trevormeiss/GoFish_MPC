@@ -76,9 +76,7 @@ int PlayerStore::cardReconstruction() {
 Card* PlayerStore::indexToCard(const int index) {
 	// Get all the shares for card at this index
 	int i = 0;
-	cout << "Received deck shares from\n";
 	for (auto player : connectedPlayers) {
-		cout << i+1 << endl;
 		if (i + 1 == playerNum) {
 			receivedShares[i] = deckShares[index];
 		}
@@ -87,7 +85,6 @@ Card* PlayerStore::indexToCard(const int index) {
 		}
 		i++;
 	}
-	cout << endl;
 	// Reconstruct card from shares
 	int cardNum = cardReconstruction();
 	return new Card(cardNum, index);
@@ -489,7 +486,6 @@ void PlayerStore::receivedRequest(std::vector<int16_t> & _return, const int16_t 
 		cout << "Received request for cards of rank " << rank << " from player " << activePlayer << endl;
 		// Validate that sender has card of requested rank
 		Card* card = indexToCard(index);
-		cout << "Player " << activePlayer << " sent the " << card->cardString() << endl;
 		if (card->rankString() != rank) {
 			cout << "Player " << activePlayer << "'s proposed card was not of rank " << rank << endl;
 		}
