@@ -191,6 +191,7 @@ void drawHands(map<ServerAddress, InitializerClientTransport*> &connectedPlayers
 		}
 		i++;
 	}
+	cout << "All players finished drawing hands\n";
 }
 
 //**********************************************************
@@ -198,6 +199,7 @@ void drawHands(map<ServerAddress, InitializerClientTransport*> &connectedPlayers
 //**********************************************************
 void startGame(map<ServerAddress, InitializerClientTransport*> &connectedPlayers) {
 
+	cout << "Game started, waiting for winner...\n";
 	// Choose random player to start the game
 	auto it = connectedPlayers.begin();
 	int adv = rand_int(0, connectedPlayers.size() - 1);
@@ -230,7 +232,7 @@ int main(int argc, char *argv[])
 	                        "s:\t\tstart Go Fish\n"
 	                        "q:\t\tquit\n\n";
 
-	cout << "~\nWelcome to Go Fish with MPC!\n~" << viableCommands;
+	cout << "><>\nWelcome to Go Fish with MPC!\n<><" << viableCommands;
 
 	map<ServerAddress, InitializerClientTransport*> connectedPlayers;
 	string input;

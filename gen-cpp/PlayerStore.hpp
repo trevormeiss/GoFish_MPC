@@ -65,9 +65,10 @@ private:
 	int delta(int i, int x, queue<int> players);
 	vector<int> recombination_vector(queue<int> &players);
 	int cardReconstruction();
+	bool wasPreviousPlayer();
 	Card* indexToCard(const int index);
 	set<string> ranksHeld();
-	void bookFound(vector<Card*> &book);
+	void bookFound(vector<Card> &book);
 	void checkForBook();
 	void printHands();
 	int inputPlayerNum();
@@ -91,7 +92,8 @@ public:
 	void receivedRequest(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index);
 	void numCardsReplied(const int16_t numCards);
 	bool validateBook(const std::vector<int32_t> & indices);
-	bool connectToPlayer(const ServerAddress &pServerAddress);
+	bool addConnectedPlayer(const ServerAddress &pServerAddress);
+	PlayerClientTransport* connectToPlayer(const ServerAddress &pServerAddress);
 	int16_t waitForFinish();
 
 };

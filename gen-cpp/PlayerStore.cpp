@@ -71,15 +71,36 @@ int PlayerStore::cardReconstruction() {
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// wasPreviousPlayer
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bool PlayerStore::wasPreviousPlayer() {
+	return playerNum == activePlayer-1 ||
+		   (activePlayer == 1 && playerNum == numPlayers);
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // indexToCard
+// obtains shares from all players to reconstruct card
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Card* PlayerStore::indexToCard(const int index) {
 	// Get all the shares for card at this index
 	int i = 0;
 	for (auto player : connectedPlayers) {
-		if (i + 1 == playerNum) {
+		// This player can obtain share locally
+		if (i+1 == playerNum) {
 			receivedShares[i] = deckShares[index];
 		}
+		// If asking activePlayer for share and you had previous turn
+		if (i+1 == activePlayer && wasPreviousPlayer()) {
+			// Must create a new connection
+			PlayerClientTransport* clientTransport = connectToPlayer(player.first);
+			// Ask for share
+			receivedShares[i] = clientTransport->client.getDeckShare(index);
+			// End communication and delete
+			clientTransport->transport->close();
+			delete clientTransport;
+		}
+		// Ask the player for share at index
 		else {
 			receivedShares[i] = player.second->client.getDeckShare(index);
 		}
@@ -106,12 +127,14 @@ set<string> PlayerStore::ranksHeld() {
 // bookFound
 // book found in hand, tell other players
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void PlayerStore::bookFound(vector<Card*> &book) {
+void PlayerStore::bookFound(vector<Card> &book) {
 	vector<int> indices;
 	for (auto card : book) {
-		indices.push_back(card->getIndex());
+		indices.push_back(card.getIndex());
 	}
+	
 	// Tell the players
+	cout << "Telling other players...\n";
 	int i = 1;
 	for (auto player : connectedPlayers) {
 		// Don't ask yourself to validate book
@@ -123,8 +146,9 @@ void PlayerStore::bookFound(vector<Card*> &book) {
 	}
 	numBooks++;
 	// Remove these cards from hand
+	cout << "Removing cards from hand...\n";
 	for (auto card : book) {
-		hand.erase(*card);
+		hand.erase(card);
 	}
 }
 
@@ -132,21 +156,25 @@ void PlayerStore::bookFound(vector<Card*> &book) {
 // checkForBook
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void PlayerStore::checkForBook() {
-	vector<Card*> sameRank;
+	vector<Card> sameRank;
 	int prevRank = -1;
 	// Count the occurrences of each rank in hand
 	// Since the cards are ordered in the hand, we can count linearly
 	for (auto card : hand) {
 		if (card.getRank() == prevRank) {
-			sameRank.push_back(&card);
+			sameRank.push_back(card);
 			// Book found?
 			if (sameRank.size() == bookSize) {
+				cout << "You have a book of cards with rank " << card.rankString() << "!\n";
 				bookFound(sameRank);
+				// The remaining cards could contain a book
+				checkForBook();
+				break;
 			}
 		}
 		else {
 			sameRank.clear();
-			sameRank.push_back(&card);
+			sameRank.push_back(card);
 			prevRank = card.getRank();
 		}
 	}
@@ -249,7 +277,7 @@ bool PlayerStore::makeRequest() {
 	// Ask user which rank they want to fish for
 	string rank = inputRank();
 
-	int index=0;
+	int index = 0;
 	// Find a card in hand that matches this rank
 	for (auto card : hand) {
 		if (card.rankString() == rank) {
@@ -273,7 +301,7 @@ bool PlayerStore::makeRequest() {
 
 	// If nothing returned, go fish
 	if (_return.empty()) {
-		cout << "Go Fish!\n";
+		cout << "><> Go Fish! <><\n";
 		if (!drawCard(catchMade, rank))
 			cout << "Unable to draw card\n";
 	}
@@ -537,7 +565,7 @@ bool PlayerStore::validateBook(const std::vector<int32_t> & indices) {
 	bool valid = false;
 	int count = 0;
 	int rank;
-	string rankString;
+	string rankString = "";
 	// Make sure all cards have same rank
 	for (auto &index : indices) {
 		Card* card = indexToCard(index);
@@ -553,39 +581,57 @@ bool PlayerStore::validateBook(const std::vector<int32_t> & indices) {
 	}
 
 	if (count >= bookSize) {
-		cout << "Player has a book of cards with rank " << rank << endl;
+		cout << "Player " << activePlayer << " has a book of cards with rank " << rankString << endl;
 		valid = true;
+	}
+	else {
+		cout << "Player " << activePlayer << " does not have enough cards of rank " << rankString << " to form a book\n";
 	}
 
 	return valid;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Connect to another player
+// addConnectedPlayer
+// connect to a player and add to connectedPlayers
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bool PlayerStore::connectToPlayer(const ServerAddress &pServerAddress) {
+bool PlayerStore::addConnectedPlayer(const ServerAddress &pServerAddress) {
 	bool result = false;
-// Make sure not already connected
+	// Make sure not already in connectedPlayers
 	auto it = connectedPlayers.find(pServerAddress);
-// Not found, try to connect
+	// Not found, try to connect
 	if (it == connectedPlayers.end() || it->second->transport == NULL) {
-		// Set up connection
-		boost::shared_ptr<TTransport> socket(new TSocket(pServerAddress.hostname, pServerAddress.port));
-		boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
-		boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-		boost::shared_ptr<TProtocol> mp(new TMultiplexedProtocol(protocol, "Player"));
-		PlayerClient pClient(mp);
-		try {
-			// Connect to server
-			transport->open();
-			connectedPlayers[pServerAddress] = new PlayerClientTransport(pClient, transport);
-			result = true;
-		} catch (TException& tx) {
-			string what(tx.what());
-			printf("Failed to connect to player\n");
-		}
+		connectedPlayers[pServerAddress] = connectToPlayer(pServerAddress);
+		result = true;
 	} // end if
+	else {
+		cout << "Already connected to player at " << pServerAddress.hostname << ":" << pServerAddress.port << endl;
+	}
 	return result;
+}
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// connectToPlayer
+// returns a client and transport
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PlayerClientTransport* PlayerStore::connectToPlayer(const ServerAddress &pServerAddress) {
+	PlayerClientTransport* clientTransport;
+
+	boost::shared_ptr<TTransport> socket(new TSocket(pServerAddress.hostname, pServerAddress.port));
+	boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+	boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+	boost::shared_ptr<TProtocol> mp(new TMultiplexedProtocol(protocol, "Player"));
+	PlayerClient pClient(mp);
+	try {
+		// Connect to server
+		transport->open();
+		clientTransport = new PlayerClientTransport(pClient, transport);
+	} catch (TException& tx) {
+		string what(tx.what());
+		cout << "Failed to connect to player at " << pServerAddress.hostname << ":" << pServerAddress.port << endl;
+	}
+
+	return clientTransport;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

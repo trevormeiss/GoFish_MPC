@@ -16,6 +16,10 @@ public:
 	std::string cardString() const;
 	std::string rankString() const;
 
+	bool operator == (const Card &rhs) const {
+		return this->index == rhs.index;
+	}
+
 	bool operator < (const Card &rhs) const {
 		return this->rank < rhs.rank ||
 		       (this->rank == rhs.rank && this->suit < rhs.suit);

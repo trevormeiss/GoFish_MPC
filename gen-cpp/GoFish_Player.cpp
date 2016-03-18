@@ -67,7 +67,7 @@ public:
 
 	bool connectToPlayer(const ServerAddress& serverAddress) {
 		cout << "Connecting to player at " << serverAddress.hostname << ":" << serverAddress.port << endl;
-		return thisPlayer->connectToPlayer(serverAddress);
+		return thisPlayer->addConnectedPlayer(serverAddress);
 	}
 
 	// Once a player number is set, no more players will be added
@@ -91,6 +91,7 @@ public:
 	}
 
 	bool drawHand(const int16_t numCards) {
+		cout << "~\nDrawing Hand\n~\n";
 		bool dummyBool;
 		string dummyRank = "";
 		for (int i = 0; i < numCards; i++) {
