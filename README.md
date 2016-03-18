@@ -1,6 +1,8 @@
 # GoFish_MPC
 A simple command line game of Go Fish using Secure MultiParty Computation
 
+https://github.com/trevormeiss/GoFish_MPC
+
 ## Functionalities
 
 1. __Shared unknown set with private removal__: Players share a stockpile to draw cards from. When a player draws a card, other players should not know what card was drawn but should also not be able to draw that card in the future.
