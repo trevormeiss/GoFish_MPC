@@ -42,6 +42,7 @@ private:
 	int playerNum;
 	int prime;
 	int activePlayer;
+	int requestedPlayer;
 
 	atomic<bool> finished;
 	int winner;
@@ -87,8 +88,8 @@ public:
 	int cardDrawn(const int16_t index);
 	void beginTurn();
 	void setReceivedShare(const int pNum, const int val);
-	void receivedRequest(std::vector<int16_t> & _return, const std::string& rank, const int16_t index);
-	bool validateRequest(const std::string& rank, const int16_t index);
+	void receivedRequest(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index);
+	void numCardsReplied(const int16_t numCards);
 	bool validateBook(const std::vector<int32_t> & indices);
 	bool connectToPlayer(const ServerAddress &pServerAddress);
 	int16_t waitForFinish();

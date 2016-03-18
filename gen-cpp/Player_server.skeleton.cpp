@@ -22,14 +22,14 @@ class PlayerHandler : virtual public PlayerIf {
     // Your initialization goes here
   }
 
-  void request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index) {
+  void request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index) {
     // Your implementation goes here
     printf("request\n");
   }
 
-  bool validateRequest(const std::string& rank, const int16_t index) {
+  void numCardsOfRankInHand(const int16_t numCards) {
     // Your implementation goes here
-    printf("validateRequest\n");
+    printf("numCardsOfRankInHand\n");
   }
 
   int32_t cardDrawn(const int16_t index) {

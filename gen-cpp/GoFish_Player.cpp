@@ -119,12 +119,12 @@ public:
 		thisPlayer = playerStore;
 	}
 
-	void request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index) {
-		thisPlayer->receivedRequest(_return, rank, index);
+	void request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index) {
+		thisPlayer->receivedRequest(_return, pNum, rank, index);
 	}
 
-	bool validateRequest(const std::string& rank, const int16_t index) {
-		return thisPlayer->validateRequest(rank, index);
+	void numCardsOfRankInHand(const int16_t numCards) {
+		thisPlayer->numCardsReplied(numCards);
 	}
 
 	int32_t cardDrawn(const int16_t index) {

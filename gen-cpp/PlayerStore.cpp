@@ -76,7 +76,9 @@ int PlayerStore::cardReconstruction() {
 Card* PlayerStore::indexToCard(const int index) {
 	// Get all the shares for card at this index
 	int i = 0;
+	cout << "Received deck shares from\n";
 	for (auto player : connectedPlayers) {
+		cout << i+1 << endl;
 		if (i + 1 == playerNum) {
 			receivedShares[i] = deckShares[index];
 		}
@@ -85,6 +87,7 @@ Card* PlayerStore::indexToCard(const int index) {
 		}
 		i++;
 	}
+	cout << endl;
 	// Reconstruct card from shares
 	int cardNum = cardReconstruction();
 	return new Card(cardNum, index);
@@ -114,8 +117,11 @@ void PlayerStore::bookFound(vector<Card*> &book) {
 	// Tell the players
 	int i = 1;
 	for (auto player : connectedPlayers) {
-		if (!player.second->client.bookAcquired(indices))
-			cout << "Player " << i << "doesn't agree that book was acquired\n";
+		// Don't ask yourself to validate book
+		if (i != playerNum) {
+			if (!player.second->client.bookAcquired(indices))
+				cout << "Player " << i << "doesn't agree that book was acquired\n";
+		}
 		i++;
 	}
 	numBooks++;
@@ -197,13 +203,13 @@ void PlayerStore::printHands() {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // inputPlayerNum
+// Ask user to specify what player they want to request cards from
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int PlayerStore::inputPlayerNum() {
-	// Ask user to specify what player they want to request cards from
 	int pNum;
 	bool validNumber = false;
 	while (!validNumber) {
-		cout << "Enter player number to ask for cards: ";
+		cout << "\nEnter player number to ask for cards: ";
 		cin >> pNum;
 		if (pNum == playerNum) cout << "You cannot ask yourself for cards\n";
 		else if (pNum <= 0 || pNum > numPlayers) cout << pNum << " is not a valid player number\n";
@@ -214,10 +220,10 @@ int PlayerStore::inputPlayerNum() {
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // inputRank
+// Ask user to specify which rank they want
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 string PlayerStore::inputRank() {
 	string rank;
-	// Ask user to specify which rank they want
 	set<string> ranks = ranksHeld();
 	bool validRank = false;
 	while (!validRank) {
@@ -243,37 +249,40 @@ bool PlayerStore::makeRequest() {
 	bool catchMade = false;
 	// Ask user to specify what player they want to request cards from
 	int pNum = inputPlayerNum();
-// Ask user which rank they want to fish for
+	// Ask user which rank they want to fish for
 	string rank = inputRank();
 
-	int index;
-// Find a card in hand that matches this rank
+	int index=0;
+	// Find a card in hand that matches this rank
 	for (auto card : hand) {
 		if (card.rankString() == rank) {
 			index = card.getIndex();
 		}
 	}
 
-// Make request
+	// Make request
 	vector<int16_t> _return;
+	vector<int16_t> dummyReturn;
 	int i = 1;
 	for (auto player : connectedPlayers) {
 		if (i == pNum) {
-			player.second->client.request(_return, rank, index);
-			break;
+			player.second->client.request(_return, pNum, rank, index);
+		}
+		else if (i != playerNum) {
+			player.second->client.request(dummyReturn, pNum, rank, index);
 		}
 		i++;
 	}
 
-// If nothing returned, go fish
+	// If nothing returned, go fish
 	if (_return.empty()) {
 		cout << "Go Fish!\n";
 		if (!drawCard(catchMade, rank))
 			cout << "Unable to draw card\n";
 	}
-// Caught fish!
+	// Caught fish!
 	else {
-		// Let player know how many fish they caught
+		// Let user know how many fish they caught
 		cout << "Player " << pNum << " returned " << _return.size() << " card(s) of rank " << rank << endl;
 
 		// Make sure the player gave you the correct cards
@@ -297,7 +306,10 @@ bool PlayerStore::makeRequest() {
 // Constructor
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PlayerStore::PlayerStore() {
-	playerNum = 1;
+	playerNum       = 1;
+	activePlayer    = 1;
+	requestedPlayer = 1;
+
 	prime     = 127;
 	bookSize  = 4;
 	numBooks  = 0;
@@ -347,7 +359,7 @@ void PlayerStore::setPrime(const int32_t p) {
 void PlayerStore::setActivePlayer(const int16_t pNum) {
 	activePlayer = pNum;
 	if (pNum != playerNum) {
-		cout << "Player " << pNum << "'s turn\n";
+		cout << "~\nPlayer " << pNum << "'s turn\n";
 	}
 }
 
@@ -421,11 +433,9 @@ int PlayerStore::cardDrawn(const int16_t index) {
 // beginTurn
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void PlayerStore::beginTurn() {
-	cout << "~\n";
+	cout << "~\nYour Turn!\n~\n";
 	// Let player know how many cards/books other players have
 	printHands();
-
-	cout << endl;
 
 	// If you don't have any cards and there are no more cards to draw, you are done
 	if (!hand.empty() || !remainingCardIndices.empty()) {
@@ -458,6 +468,7 @@ void PlayerStore::beginTurn() {
 		}
 		i++;
 	}
+	cout << "Turn over\n";
 
 }
 
@@ -471,53 +482,63 @@ void PlayerStore::setReceivedShare(const int pNum, const int val) {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // receivedRequest
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void PlayerStore::receivedRequest(std::vector<int16_t> & _return, const std::string& rank, const int16_t index) {
-	cout << "Received request for cards of rank " << rank << endl;
+void PlayerStore::receivedRequest(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index) {
+	requestedPlayer = pNum;
 
-	// Ask all players if this is a valid request
-	int i = 1;
-	for (auto player : connectedPlayers) {
-		// Requester should not validate their own request
-		if (i != activePlayer) {
-			if (!player.second->client.validateRequest(rank, index))
-				cout << "Player " << i << " does not believe this is a valid request\n";
+	if (pNum == playerNum) {
+		cout << "Received request for cards of rank " << rank << " from player " << activePlayer << endl;
+		// Validate that sender has card of requested rank
+		Card* card = indexToCard(index);
+		cout << "Player " << activePlayer << " sent the " << card->cardString() << endl;
+		if (card->rankString() != rank) {
+			cout << "Player " << activePlayer << "'s proposed card was not of rank " << rank << endl;
+		}
+		else {
+			// Give the player all cards of requested rank
+			// and remove them from your hand
+			auto iter = hand.begin();
+			while (iter != hand.end()) {
+				if (iter->rankString() == rank) {
+					_return.push_back(iter->getIndex());
+					iter = hand.erase(iter);
+				}
+				else
+					++iter;
+			}
 		}
 
-		i++;
+		// Let all players know how many cards were sent
+		int i = 1;
+		for (auto player : connectedPlayers) {
+			// No need to tell the player who made the request or yourself
+			if (i != activePlayer && i != playerNum) {
+				player.second->client.numCardsOfRankInHand(_return.size());
+			}
+			i++;
+		}
+
+		// Let user know how many cards were sent
+		cout << "Sent " << _return.size() << " card(s) of rank " << rank << " to player " << activePlayer << endl;
 	}
-	// Give the player all cards of requested rank
-	// and remove them from your hand
-	auto iter = hand.begin();
-	while (iter != hand.end()) {
-		if (iter->rankString() == rank) {
-			_return.push_back(iter->getIndex());
-			iter = hand.erase(iter);
-		}
-		else
-			++iter;
+	// Active player isn't asking this player for cards
+	else {
+		cout << "Player " << activePlayer << " is requesting cards of rank " << rank << " from player " << pNum << endl;
 	}
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// validateRequest
+// numCardsReplied
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-bool PlayerStore::validateRequest(const std::string& rank, const int16_t index) {
-	bool valid = false;
-
-	Card* card = indexToCard(index);
-
-	// Does this card have the expected rank?
-	if (card->rankString() == rank)
-		valid = true;
-
-	return valid;
+void PlayerStore::numCardsReplied(const int16_t numCards) {
+	if (requestedPlayer != playerNum)
+		cout << "Player " << requestedPlayer << " gave " << numCards << " card(s) to player " << activePlayer << endl;
 }
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // validateBook
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool PlayerStore::validateBook(const std::vector<int32_t> & indices) {
-	bool valid = true;
+	bool valid = false;
 	int count = 0;
 	int rank;
 	string rankString;
@@ -535,13 +556,9 @@ bool PlayerStore::validateBook(const std::vector<int32_t> & indices) {
 		count++;
 	}
 
-	if (count > 0) {
+	if (count >= bookSize) {
 		cout << "Player has a book of cards with rank " << rank << endl;
-	}
-
-	// Make sure there are actually enough cards in book
-	if (count < bookSize) {
-		valid = false;
+		valid = true;
 	}
 
 	return valid;
@@ -575,7 +592,9 @@ bool PlayerStore::connectToPlayer(const ServerAddress &pServerAddress) {
 	return result;
 }
 
-
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// waitForFinish
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int16_t PlayerStore::waitForFinish() {
 	while (!finished.load()) ;
 	return winner;

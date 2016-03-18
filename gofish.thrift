@@ -44,8 +44,8 @@ exception InvalidOperation {
  *****************/
 
 service Player {
-  list<i16> request(1:string rank, 2:i16 index),
-  bool validateRequest(1:string rank, 2:i16 index),
+  list<i16> request(1:i16 pNum, 2:string rank, 3:i16 index),
+  void numCardsOfRankInHand(1:i16 numCards),
   i32 cardDrawn(1:i16 index),
   i32 getDeckShare(1:i16 index),
   State startTurn(1:i16 pNum),

@@ -21,8 +21,8 @@ namespace gofish {
 class PlayerIf {
  public:
   virtual ~PlayerIf() {}
-  virtual void request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index) = 0;
-  virtual bool validateRequest(const std::string& rank, const int16_t index) = 0;
+  virtual void request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index) = 0;
+  virtual void numCardsOfRankInHand(const int16_t numCards) = 0;
   virtual int32_t cardDrawn(const int16_t index) = 0;
   virtual int32_t getDeckShare(const int16_t index) = 0;
   virtual void startTurn(State& _return, const int16_t pNum) = 0;
@@ -57,12 +57,11 @@ class PlayerIfSingletonFactory : virtual public PlayerIfFactory {
 class PlayerNull : virtual public PlayerIf {
  public:
   virtual ~PlayerNull() {}
-  void request(std::vector<int16_t> & /* _return */, const std::string& /* rank */, const int16_t /* index */) {
+  void request(std::vector<int16_t> & /* _return */, const int16_t /* pNum */, const std::string& /* rank */, const int16_t /* index */) {
     return;
   }
-  bool validateRequest(const std::string& /* rank */, const int16_t /* index */) {
-    bool _return = false;
-    return _return;
+  void numCardsOfRankInHand(const int16_t /* numCards */) {
+    return;
   }
   int32_t cardDrawn(const int16_t /* index */) {
     int32_t _return = 0;
@@ -85,7 +84,8 @@ class PlayerNull : virtual public PlayerIf {
 };
 
 typedef struct _Player_request_args__isset {
-  _Player_request_args__isset() : rank(false), index(false) {}
+  _Player_request_args__isset() : pNum(false), rank(false), index(false) {}
+  bool pNum :1;
   bool rank :1;
   bool index :1;
 } _Player_request_args__isset;
@@ -95,14 +95,17 @@ class Player_request_args {
 
   Player_request_args(const Player_request_args&);
   Player_request_args& operator=(const Player_request_args&);
-  Player_request_args() : rank(), index(0) {
+  Player_request_args() : pNum(0), rank(), index(0) {
   }
 
   virtual ~Player_request_args() throw();
+  int16_t pNum;
   std::string rank;
   int16_t index;
 
   _Player_request_args__isset __isset;
+
+  void __set_pNum(const int16_t val);
 
   void __set_rank(const std::string& val);
 
@@ -110,6 +113,8 @@ class Player_request_args {
 
   bool operator == (const Player_request_args & rhs) const
   {
+    if (!(pNum == rhs.pNum))
+      return false;
     if (!(rank == rhs.rank))
       return false;
     if (!(index == rhs.index))
@@ -133,6 +138,7 @@ class Player_request_pargs {
 
 
   virtual ~Player_request_pargs() throw();
+  const int16_t* pNum;
   const std::string* rank;
   const int16_t* index;
 
@@ -195,43 +201,37 @@ class Player_request_presult {
 
 };
 
-typedef struct _Player_validateRequest_args__isset {
-  _Player_validateRequest_args__isset() : rank(false), index(false) {}
-  bool rank :1;
-  bool index :1;
-} _Player_validateRequest_args__isset;
+typedef struct _Player_numCardsOfRankInHand_args__isset {
+  _Player_numCardsOfRankInHand_args__isset() : numCards(false) {}
+  bool numCards :1;
+} _Player_numCardsOfRankInHand_args__isset;
 
-class Player_validateRequest_args {
+class Player_numCardsOfRankInHand_args {
  public:
 
-  Player_validateRequest_args(const Player_validateRequest_args&);
-  Player_validateRequest_args& operator=(const Player_validateRequest_args&);
-  Player_validateRequest_args() : rank(), index(0) {
+  Player_numCardsOfRankInHand_args(const Player_numCardsOfRankInHand_args&);
+  Player_numCardsOfRankInHand_args& operator=(const Player_numCardsOfRankInHand_args&);
+  Player_numCardsOfRankInHand_args() : numCards(0) {
   }
 
-  virtual ~Player_validateRequest_args() throw();
-  std::string rank;
-  int16_t index;
+  virtual ~Player_numCardsOfRankInHand_args() throw();
+  int16_t numCards;
 
-  _Player_validateRequest_args__isset __isset;
+  _Player_numCardsOfRankInHand_args__isset __isset;
 
-  void __set_rank(const std::string& val);
+  void __set_numCards(const int16_t val);
 
-  void __set_index(const int16_t val);
-
-  bool operator == (const Player_validateRequest_args & rhs) const
+  bool operator == (const Player_numCardsOfRankInHand_args & rhs) const
   {
-    if (!(rank == rhs.rank))
-      return false;
-    if (!(index == rhs.index))
+    if (!(numCards == rhs.numCards))
       return false;
     return true;
   }
-  bool operator != (const Player_validateRequest_args &rhs) const {
+  bool operator != (const Player_numCardsOfRankInHand_args &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Player_validateRequest_args & ) const;
+  bool operator < (const Player_numCardsOfRankInHand_args & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
@@ -239,68 +239,49 @@ class Player_validateRequest_args {
 };
 
 
-class Player_validateRequest_pargs {
+class Player_numCardsOfRankInHand_pargs {
  public:
 
 
-  virtual ~Player_validateRequest_pargs() throw();
-  const std::string* rank;
-  const int16_t* index;
+  virtual ~Player_numCardsOfRankInHand_pargs() throw();
+  const int16_t* numCards;
 
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Player_validateRequest_result__isset {
-  _Player_validateRequest_result__isset() : success(false) {}
-  bool success :1;
-} _Player_validateRequest_result__isset;
 
-class Player_validateRequest_result {
+class Player_numCardsOfRankInHand_result {
  public:
 
-  Player_validateRequest_result(const Player_validateRequest_result&);
-  Player_validateRequest_result& operator=(const Player_validateRequest_result&);
-  Player_validateRequest_result() : success(0) {
+  Player_numCardsOfRankInHand_result(const Player_numCardsOfRankInHand_result&);
+  Player_numCardsOfRankInHand_result& operator=(const Player_numCardsOfRankInHand_result&);
+  Player_numCardsOfRankInHand_result() {
   }
 
-  virtual ~Player_validateRequest_result() throw();
-  bool success;
+  virtual ~Player_numCardsOfRankInHand_result() throw();
 
-  _Player_validateRequest_result__isset __isset;
-
-  void __set_success(const bool val);
-
-  bool operator == (const Player_validateRequest_result & rhs) const
+  bool operator == (const Player_numCardsOfRankInHand_result & /* rhs */) const
   {
-    if (!(success == rhs.success))
-      return false;
     return true;
   }
-  bool operator != (const Player_validateRequest_result &rhs) const {
+  bool operator != (const Player_numCardsOfRankInHand_result &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const Player_validateRequest_result & ) const;
+  bool operator < (const Player_numCardsOfRankInHand_result & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-typedef struct _Player_validateRequest_presult__isset {
-  _Player_validateRequest_presult__isset() : success(false) {}
-  bool success :1;
-} _Player_validateRequest_presult__isset;
 
-class Player_validateRequest_presult {
+class Player_numCardsOfRankInHand_presult {
  public:
 
 
-  virtual ~Player_validateRequest_presult() throw();
-  bool* success;
-
-  _Player_validateRequest_presult__isset __isset;
+  virtual ~Player_numCardsOfRankInHand_presult() throw();
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
 
@@ -784,12 +765,12 @@ class PlayerClient : virtual public PlayerIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  void request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index);
-  void send_request(const std::string& rank, const int16_t index);
+  void request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index);
+  void send_request(const int16_t pNum, const std::string& rank, const int16_t index);
   void recv_request(std::vector<int16_t> & _return);
-  bool validateRequest(const std::string& rank, const int16_t index);
-  void send_validateRequest(const std::string& rank, const int16_t index);
-  bool recv_validateRequest();
+  void numCardsOfRankInHand(const int16_t numCards);
+  void send_numCardsOfRankInHand(const int16_t numCards);
+  void recv_numCardsOfRankInHand();
   int32_t cardDrawn(const int16_t index);
   void send_cardDrawn(const int16_t index);
   int32_t recv_cardDrawn();
@@ -820,7 +801,7 @@ class PlayerProcessor : public ::apache::thrift::TDispatchProcessor {
   typedef std::map<std::string, ProcessFunction> ProcessMap;
   ProcessMap processMap_;
   void process_request(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
-  void process_validateRequest(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
+  void process_numCardsOfRankInHand(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_cardDrawn(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_getDeckShare(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
   void process_startTurn(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext);
@@ -830,7 +811,7 @@ class PlayerProcessor : public ::apache::thrift::TDispatchProcessor {
   PlayerProcessor(boost::shared_ptr<PlayerIf> iface) :
     iface_(iface) {
     processMap_["request"] = &PlayerProcessor::process_request;
-    processMap_["validateRequest"] = &PlayerProcessor::process_validateRequest;
+    processMap_["numCardsOfRankInHand"] = &PlayerProcessor::process_numCardsOfRankInHand;
     processMap_["cardDrawn"] = &PlayerProcessor::process_cardDrawn;
     processMap_["getDeckShare"] = &PlayerProcessor::process_getDeckShare;
     processMap_["startTurn"] = &PlayerProcessor::process_startTurn;
@@ -864,23 +845,23 @@ class PlayerMultiface : virtual public PlayerIf {
     ifaces_.push_back(iface);
   }
  public:
-  void request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index) {
+  void request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->request(_return, rank, index);
+      ifaces_[i]->request(_return, pNum, rank, index);
     }
-    ifaces_[i]->request(_return, rank, index);
+    ifaces_[i]->request(_return, pNum, rank, index);
     return;
   }
 
-  bool validateRequest(const std::string& rank, const int16_t index) {
+  void numCardsOfRankInHand(const int16_t numCards) {
     size_t sz = ifaces_.size();
     size_t i = 0;
     for (; i < (sz - 1); ++i) {
-      ifaces_[i]->validateRequest(rank, index);
+      ifaces_[i]->numCardsOfRankInHand(numCards);
     }
-    return ifaces_[i]->validateRequest(rank, index);
+    ifaces_[i]->numCardsOfRankInHand(numCards);
   }
 
   int32_t cardDrawn(const int16_t index) {
@@ -959,12 +940,12 @@ class PlayerConcurrentClient : virtual public PlayerIf {
   boost::shared_ptr< ::apache::thrift::protocol::TProtocol> getOutputProtocol() {
     return poprot_;
   }
-  void request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index);
-  int32_t send_request(const std::string& rank, const int16_t index);
+  void request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index);
+  int32_t send_request(const int16_t pNum, const std::string& rank, const int16_t index);
   void recv_request(std::vector<int16_t> & _return, const int32_t seqid);
-  bool validateRequest(const std::string& rank, const int16_t index);
-  int32_t send_validateRequest(const std::string& rank, const int16_t index);
-  bool recv_validateRequest(const int32_t seqid);
+  void numCardsOfRankInHand(const int16_t numCards);
+  int32_t send_numCardsOfRankInHand(const int16_t numCards);
+  void recv_numCardsOfRankInHand(const int32_t seqid);
   int32_t cardDrawn(const int16_t index);
   int32_t send_cardDrawn(const int16_t index);
   int32_t recv_cardDrawn(const int32_t seqid);

@@ -35,6 +35,14 @@ uint32_t Player_request_args::read(::apache::thrift::protocol::TProtocol* iprot)
     switch (fid)
     {
       case 1:
+        if (ftype == ::apache::thrift::protocol::T_I16) {
+          xfer += iprot->readI16(this->pNum);
+          this->__isset.pNum = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
         if (ftype == ::apache::thrift::protocol::T_STRING) {
           xfer += iprot->readString(this->rank);
           this->__isset.rank = true;
@@ -42,7 +50,7 @@ uint32_t Player_request_args::read(::apache::thrift::protocol::TProtocol* iprot)
           xfer += iprot->skip(ftype);
         }
         break;
-      case 2:
+      case 3:
         if (ftype == ::apache::thrift::protocol::T_I16) {
           xfer += iprot->readI16(this->index);
           this->__isset.index = true;
@@ -67,11 +75,15 @@ uint32_t Player_request_args::write(::apache::thrift::protocol::TProtocol* oprot
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("Player_request_args");
 
-  xfer += oprot->writeFieldBegin("rank", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("pNum", ::apache::thrift::protocol::T_I16, 1);
+  xfer += oprot->writeI16(this->pNum);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("rank", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString(this->rank);
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("index", ::apache::thrift::protocol::T_I16, 2);
+  xfer += oprot->writeFieldBegin("index", ::apache::thrift::protocol::T_I16, 3);
   xfer += oprot->writeI16(this->index);
   xfer += oprot->writeFieldEnd();
 
@@ -90,11 +102,15 @@ uint32_t Player_request_pargs::write(::apache::thrift::protocol::TProtocol* opro
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
   xfer += oprot->writeStructBegin("Player_request_pargs");
 
-  xfer += oprot->writeFieldBegin("rank", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeFieldBegin("pNum", ::apache::thrift::protocol::T_I16, 1);
+  xfer += oprot->writeI16((*(this->pNum)));
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("rank", ::apache::thrift::protocol::T_STRING, 2);
   xfer += oprot->writeString((*(this->rank)));
   xfer += oprot->writeFieldEnd();
 
-  xfer += oprot->writeFieldBegin("index", ::apache::thrift::protocol::T_I16, 2);
+  xfer += oprot->writeFieldBegin("index", ::apache::thrift::protocol::T_I16, 3);
   xfer += oprot->writeI16((*(this->index)));
   xfer += oprot->writeFieldEnd();
 
@@ -244,11 +260,11 @@ uint32_t Player_request_presult::read(::apache::thrift::protocol::TProtocol* ipr
 }
 
 
-Player_validateRequest_args::~Player_validateRequest_args() throw() {
+Player_numCardsOfRankInHand_args::~Player_numCardsOfRankInHand_args() throw() {
 }
 
 
-uint32_t Player_validateRequest_args::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Player_numCardsOfRankInHand_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -270,17 +286,9 @@ uint32_t Player_validateRequest_args::read(::apache::thrift::protocol::TProtocol
     switch (fid)
     {
       case 1:
-        if (ftype == ::apache::thrift::protocol::T_STRING) {
-          xfer += iprot->readString(this->rank);
-          this->__isset.rank = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      case 2:
         if (ftype == ::apache::thrift::protocol::T_I16) {
-          xfer += iprot->readI16(this->index);
-          this->__isset.index = true;
+          xfer += iprot->readI16(this->numCards);
+          this->__isset.numCards = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -297,17 +305,13 @@ uint32_t Player_validateRequest_args::read(::apache::thrift::protocol::TProtocol
   return xfer;
 }
 
-uint32_t Player_validateRequest_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Player_numCardsOfRankInHand_args::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Player_validateRequest_args");
+  xfer += oprot->writeStructBegin("Player_numCardsOfRankInHand_args");
 
-  xfer += oprot->writeFieldBegin("rank", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString(this->rank);
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("index", ::apache::thrift::protocol::T_I16, 2);
-  xfer += oprot->writeI16(this->index);
+  xfer += oprot->writeFieldBegin("numCards", ::apache::thrift::protocol::T_I16, 1);
+  xfer += oprot->writeI16(this->numCards);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -316,21 +320,17 @@ uint32_t Player_validateRequest_args::write(::apache::thrift::protocol::TProtoco
 }
 
 
-Player_validateRequest_pargs::~Player_validateRequest_pargs() throw() {
+Player_numCardsOfRankInHand_pargs::~Player_numCardsOfRankInHand_pargs() throw() {
 }
 
 
-uint32_t Player_validateRequest_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Player_numCardsOfRankInHand_pargs::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
   apache::thrift::protocol::TOutputRecursionTracker tracker(*oprot);
-  xfer += oprot->writeStructBegin("Player_validateRequest_pargs");
+  xfer += oprot->writeStructBegin("Player_numCardsOfRankInHand_pargs");
 
-  xfer += oprot->writeFieldBegin("rank", ::apache::thrift::protocol::T_STRING, 1);
-  xfer += oprot->writeString((*(this->rank)));
-  xfer += oprot->writeFieldEnd();
-
-  xfer += oprot->writeFieldBegin("index", ::apache::thrift::protocol::T_I16, 2);
-  xfer += oprot->writeI16((*(this->index)));
+  xfer += oprot->writeFieldBegin("numCards", ::apache::thrift::protocol::T_I16, 1);
+  xfer += oprot->writeI16((*(this->numCards)));
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -339,11 +339,11 @@ uint32_t Player_validateRequest_pargs::write(::apache::thrift::protocol::TProtoc
 }
 
 
-Player_validateRequest_result::~Player_validateRequest_result() throw() {
+Player_numCardsOfRankInHand_result::~Player_numCardsOfRankInHand_result() throw() {
 }
 
 
-uint32_t Player_validateRequest_result::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Player_numCardsOfRankInHand_result::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -362,20 +362,7 @@ uint32_t Player_validateRequest_result::read(::apache::thrift::protocol::TProtoc
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_BOOL) {
-          xfer += iprot->readBool(this->success);
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -384,28 +371,23 @@ uint32_t Player_validateRequest_result::read(::apache::thrift::protocol::TProtoc
   return xfer;
 }
 
-uint32_t Player_validateRequest_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t Player_numCardsOfRankInHand_result::write(::apache::thrift::protocol::TProtocol* oprot) const {
 
   uint32_t xfer = 0;
 
-  xfer += oprot->writeStructBegin("Player_validateRequest_result");
+  xfer += oprot->writeStructBegin("Player_numCardsOfRankInHand_result");
 
-  if (this->__isset.success) {
-    xfer += oprot->writeFieldBegin("success", ::apache::thrift::protocol::T_BOOL, 0);
-    xfer += oprot->writeBool(this->success);
-    xfer += oprot->writeFieldEnd();
-  }
   xfer += oprot->writeFieldStop();
   xfer += oprot->writeStructEnd();
   return xfer;
 }
 
 
-Player_validateRequest_presult::~Player_validateRequest_presult() throw() {
+Player_numCardsOfRankInHand_presult::~Player_numCardsOfRankInHand_presult() throw() {
 }
 
 
-uint32_t Player_validateRequest_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t Player_numCardsOfRankInHand_presult::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   apache::thrift::protocol::TInputRecursionTracker tracker(*iprot);
   uint32_t xfer = 0;
@@ -424,20 +406,7 @@ uint32_t Player_validateRequest_presult::read(::apache::thrift::protocol::TProto
     if (ftype == ::apache::thrift::protocol::T_STOP) {
       break;
     }
-    switch (fid)
-    {
-      case 0:
-        if (ftype == ::apache::thrift::protocol::T_BOOL) {
-          xfer += iprot->readBool((*(this->success)));
-          this->__isset.success = true;
-        } else {
-          xfer += iprot->skip(ftype);
-        }
-        break;
-      default:
-        xfer += iprot->skip(ftype);
-        break;
-    }
+    xfer += iprot->skip(ftype);
     xfer += iprot->readFieldEnd();
   }
 
@@ -1280,18 +1249,19 @@ uint32_t Player_bookAcquired_presult::read(::apache::thrift::protocol::TProtocol
   return xfer;
 }
 
-void PlayerClient::request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index)
+void PlayerClient::request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index)
 {
-  send_request(rank, index);
+  send_request(pNum, rank, index);
   recv_request(_return);
 }
 
-void PlayerClient::send_request(const std::string& rank, const int16_t index)
+void PlayerClient::send_request(const int16_t pNum, const std::string& rank, const int16_t index)
 {
   int32_t cseqid = 0;
   oprot_->writeMessageBegin("request", ::apache::thrift::protocol::T_CALL, cseqid);
 
   Player_request_pargs args;
+  args.pNum = &pNum;
   args.rank = &rank;
   args.index = &index;
   args.write(oprot_);
@@ -1339,20 +1309,19 @@ void PlayerClient::recv_request(std::vector<int16_t> & _return)
   throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "request failed: unknown result");
 }
 
-bool PlayerClient::validateRequest(const std::string& rank, const int16_t index)
+void PlayerClient::numCardsOfRankInHand(const int16_t numCards)
 {
-  send_validateRequest(rank, index);
-  return recv_validateRequest();
+  send_numCardsOfRankInHand(numCards);
+  recv_numCardsOfRankInHand();
 }
 
-void PlayerClient::send_validateRequest(const std::string& rank, const int16_t index)
+void PlayerClient::send_numCardsOfRankInHand(const int16_t numCards)
 {
   int32_t cseqid = 0;
-  oprot_->writeMessageBegin("validateRequest", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("numCardsOfRankInHand", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Player_validateRequest_pargs args;
-  args.rank = &rank;
-  args.index = &index;
+  Player_numCardsOfRankInHand_pargs args;
+  args.numCards = &numCards;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -1360,7 +1329,7 @@ void PlayerClient::send_validateRequest(const std::string& rank, const int16_t i
   oprot_->getTransport()->flush();
 }
 
-bool PlayerClient::recv_validateRequest()
+void PlayerClient::recv_numCardsOfRankInHand()
 {
 
   int32_t rseqid = 0;
@@ -1380,22 +1349,17 @@ bool PlayerClient::recv_validateRequest()
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  if (fname.compare("validateRequest") != 0) {
+  if (fname.compare("numCardsOfRankInHand") != 0) {
     iprot_->skip(::apache::thrift::protocol::T_STRUCT);
     iprot_->readMessageEnd();
     iprot_->getTransport()->readEnd();
   }
-  bool _return;
-  Player_validateRequest_presult result;
-  result.success = &_return;
+  Player_numCardsOfRankInHand_presult result;
   result.read(iprot_);
   iprot_->readMessageEnd();
   iprot_->getTransport()->readEnd();
 
-  if (result.__isset.success) {
-    return _return;
-  }
-  throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "validateRequest failed: unknown result");
+  return;
 }
 
 int32_t PlayerClient::cardDrawn(const int16_t index)
@@ -1690,7 +1654,7 @@ void PlayerProcessor::process_request(int32_t seqid, ::apache::thrift::protocol:
 
   Player_request_result result;
   try {
-    iface_->request(result.success, args.rank, args.index);
+    iface_->request(result.success, args.pNum, args.rank, args.index);
     result.__isset.success = true;
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
@@ -1721,38 +1685,37 @@ void PlayerProcessor::process_request(int32_t seqid, ::apache::thrift::protocol:
   }
 }
 
-void PlayerProcessor::process_validateRequest(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
+void PlayerProcessor::process_numCardsOfRankInHand(int32_t seqid, ::apache::thrift::protocol::TProtocol* iprot, ::apache::thrift::protocol::TProtocol* oprot, void* callContext)
 {
   void* ctx = NULL;
   if (this->eventHandler_.get() != NULL) {
-    ctx = this->eventHandler_->getContext("Player.validateRequest", callContext);
+    ctx = this->eventHandler_->getContext("Player.numCardsOfRankInHand", callContext);
   }
-  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Player.validateRequest");
+  ::apache::thrift::TProcessorContextFreer freer(this->eventHandler_.get(), ctx, "Player.numCardsOfRankInHand");
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preRead(ctx, "Player.validateRequest");
+    this->eventHandler_->preRead(ctx, "Player.numCardsOfRankInHand");
   }
 
-  Player_validateRequest_args args;
+  Player_numCardsOfRankInHand_args args;
   args.read(iprot);
   iprot->readMessageEnd();
   uint32_t bytes = iprot->getTransport()->readEnd();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postRead(ctx, "Player.validateRequest", bytes);
+    this->eventHandler_->postRead(ctx, "Player.numCardsOfRankInHand", bytes);
   }
 
-  Player_validateRequest_result result;
+  Player_numCardsOfRankInHand_result result;
   try {
-    result.success = iface_->validateRequest(args.rank, args.index);
-    result.__isset.success = true;
+    iface_->numCardsOfRankInHand(args.numCards);
   } catch (const std::exception& e) {
     if (this->eventHandler_.get() != NULL) {
-      this->eventHandler_->handlerError(ctx, "Player.validateRequest");
+      this->eventHandler_->handlerError(ctx, "Player.numCardsOfRankInHand");
     }
 
     ::apache::thrift::TApplicationException x(e.what());
-    oprot->writeMessageBegin("validateRequest", ::apache::thrift::protocol::T_EXCEPTION, seqid);
+    oprot->writeMessageBegin("numCardsOfRankInHand", ::apache::thrift::protocol::T_EXCEPTION, seqid);
     x.write(oprot);
     oprot->writeMessageEnd();
     oprot->getTransport()->writeEnd();
@@ -1761,17 +1724,17 @@ void PlayerProcessor::process_validateRequest(int32_t seqid, ::apache::thrift::p
   }
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->preWrite(ctx, "Player.validateRequest");
+    this->eventHandler_->preWrite(ctx, "Player.numCardsOfRankInHand");
   }
 
-  oprot->writeMessageBegin("validateRequest", ::apache::thrift::protocol::T_REPLY, seqid);
+  oprot->writeMessageBegin("numCardsOfRankInHand", ::apache::thrift::protocol::T_REPLY, seqid);
   result.write(oprot);
   oprot->writeMessageEnd();
   bytes = oprot->getTransport()->writeEnd();
   oprot->getTransport()->flush();
 
   if (this->eventHandler_.get() != NULL) {
-    this->eventHandler_->postWrite(ctx, "Player.validateRequest", bytes);
+    this->eventHandler_->postWrite(ctx, "Player.numCardsOfRankInHand", bytes);
   }
 }
 
@@ -2035,19 +1998,20 @@ void PlayerProcessor::process_bookAcquired(int32_t seqid, ::apache::thrift::prot
   return processor;
 }
 
-void PlayerConcurrentClient::request(std::vector<int16_t> & _return, const std::string& rank, const int16_t index)
+void PlayerConcurrentClient::request(std::vector<int16_t> & _return, const int16_t pNum, const std::string& rank, const int16_t index)
 {
-  int32_t seqid = send_request(rank, index);
+  int32_t seqid = send_request(pNum, rank, index);
   recv_request(_return, seqid);
 }
 
-int32_t PlayerConcurrentClient::send_request(const std::string& rank, const int16_t index)
+int32_t PlayerConcurrentClient::send_request(const int16_t pNum, const std::string& rank, const int16_t index)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
   oprot_->writeMessageBegin("request", ::apache::thrift::protocol::T_CALL, cseqid);
 
   Player_request_pargs args;
+  args.pNum = &pNum;
   args.rank = &rank;
   args.index = &index;
   args.write(oprot_);
@@ -2120,21 +2084,20 @@ void PlayerConcurrentClient::recv_request(std::vector<int16_t> & _return, const 
   } // end while(true)
 }
 
-bool PlayerConcurrentClient::validateRequest(const std::string& rank, const int16_t index)
+void PlayerConcurrentClient::numCardsOfRankInHand(const int16_t numCards)
 {
-  int32_t seqid = send_validateRequest(rank, index);
-  return recv_validateRequest(seqid);
+  int32_t seqid = send_numCardsOfRankInHand(numCards);
+  recv_numCardsOfRankInHand(seqid);
 }
 
-int32_t PlayerConcurrentClient::send_validateRequest(const std::string& rank, const int16_t index)
+int32_t PlayerConcurrentClient::send_numCardsOfRankInHand(const int16_t numCards)
 {
   int32_t cseqid = this->sync_.generateSeqId();
   ::apache::thrift::async::TConcurrentSendSentry sentry(&this->sync_);
-  oprot_->writeMessageBegin("validateRequest", ::apache::thrift::protocol::T_CALL, cseqid);
+  oprot_->writeMessageBegin("numCardsOfRankInHand", ::apache::thrift::protocol::T_CALL, cseqid);
 
-  Player_validateRequest_pargs args;
-  args.rank = &rank;
-  args.index = &index;
+  Player_numCardsOfRankInHand_pargs args;
+  args.numCards = &numCards;
   args.write(oprot_);
 
   oprot_->writeMessageEnd();
@@ -2145,7 +2108,7 @@ int32_t PlayerConcurrentClient::send_validateRequest(const std::string& rank, co
   return cseqid;
 }
 
-bool PlayerConcurrentClient::recv_validateRequest(const int32_t seqid)
+void PlayerConcurrentClient::recv_numCardsOfRankInHand(const int32_t seqid)
 {
 
   int32_t rseqid = 0;
@@ -2174,7 +2137,7 @@ bool PlayerConcurrentClient::recv_validateRequest(const int32_t seqid)
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
       }
-      if (fname.compare("validateRequest") != 0) {
+      if (fname.compare("numCardsOfRankInHand") != 0) {
         iprot_->skip(::apache::thrift::protocol::T_STRUCT);
         iprot_->readMessageEnd();
         iprot_->getTransport()->readEnd();
@@ -2183,19 +2146,13 @@ bool PlayerConcurrentClient::recv_validateRequest(const int32_t seqid)
         using ::apache::thrift::protocol::TProtocolException;
         throw TProtocolException(TProtocolException::INVALID_DATA);
       }
-      bool _return;
-      Player_validateRequest_presult result;
-      result.success = &_return;
+      Player_numCardsOfRankInHand_presult result;
       result.read(iprot_);
       iprot_->readMessageEnd();
       iprot_->getTransport()->readEnd();
 
-      if (result.__isset.success) {
-        sentry.commit();
-        return _return;
-      }
-      // in a bad state, don't commit
-      throw ::apache::thrift::TApplicationException(::apache::thrift::TApplicationException::MISSING_RESULT, "validateRequest failed: unknown result");
+      sentry.commit();
+      return;
     }
     // seqid != rseqid
     this->sync_.updatePending(fname, mtype, rseqid);
