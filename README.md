@@ -7,7 +7,7 @@ https://github.com/trevormeiss/GoFish_MPC
 
 1. __Shared unknown set with private removal__: Players share a stockpile to draw cards from. When a player draws a card, other players should not know what card was drawn but should also not be able to draw that card in the future.
 2. A player may only ask for ranks they already have at least one of in their hand. E.g. a player cannot ask for sixes if they don’t have at least one six in their hand.
-3. __Private set contains__: Players must forfeit the requested cards if they have them. E.g. if I ask you for sixes and you have two sixes in your hand, you must give me those two sixes. Other players should be able to determine if each card is a requested card, but should not learn anything else. _We currently do not have a protocol for this functionality._
+3. __Private set contains__: Players must forfeit the requested cards if they have them. E.g. if I ask you for sixes and you have two sixes in your hand, you must give me those two sixes. Other players should be able to determine if each card is a requested card, but should not learn anything else. _We currently do not have a protocol for this functionality because we assume the players are semi-honest._
 4. Players must validate that the cards sent are what the requesting player wanted.
 
 ## Protocol Overview
@@ -79,15 +79,3 @@ https://github.com/trevormeiss/GoFish_MPC
 8. Select a card rank to request
   * i.e. `A`
 9. Continue playing until all the cards are used!
-
-## Issues
-If you make a request to the player that just went before you, the game will freeze
-Here is what happens:
-- Player 1 tells Player 2 it is their turn
-	- `oneway void yourTurn()`
-- Player 2 sends request to Player 1
-	- `request(1,Rank,index)`
-- Player 1 constructs card from index to see if it matches rank
-	-  requires that Player get share of this index from Player 2
-		- this is where it deadlocks
-		- `yourTurn()` hasn't finished, so when player 1 calls `getDeckShare(index)` on player 2 it freezes
